@@ -87,6 +87,27 @@ interface FeedPost {
   isLiked: boolean
 }
 
+interface Notification {
+  id: string
+  type: 'success' | 'error' | 'warning'
+  title: string
+  message: string
+  timestamp: number
+}
+
+interface OperationReport {
+  id: string
+  date: string
+  symbol: string
+  type: 'BUY' | 'SELL'
+  status: 'published' | 'closed'
+  entryPrice: number
+  exitPrice?: number
+  profit?: number
+  duration?: number // em minutos
+  accountsReplicated: number
+}
+
 export default function TradePulseApp() {
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'dashboard' | 'operacao' | 'admin' | 'accounts' | 'plans' | 'plan-editor' | 'checkout' | 'payment-config' | 'reports' | 'client-history' | 'feed'>('home')
   const [adminSubView, setAdminSubView] = useState<'main' | 'plan-editor' | 'payment-config' | 'plans'>('main')
@@ -119,6 +140,33 @@ export default function TradePulseApp() {
     isBlocked: false
   })
   
+  // Performance Report States
+  const [performanceFilter, setPerformanceFilter] = useState<'week' | 'month' | 'all'>('week')
+  
+  // Notification system
+  const [notifications, setNotifications] = useState<Notification[]>([])
+
+  const showNotification = (type: 'success' | 'error' | 'warning', title: string, message: string) => {
+    const notification: Notification = {
+      id: Date.now().toString(),
+      type,
+      title,
+      message,
+      timestamp: Date.now()
+    }
+    
+    setNotifications(prev => [...prev, notification])
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== notification.id))
+    }, 5000)
+  }
+
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id))
+  }
+  
   const [newTrade, setNewTrade] = useState({
     symbol: 'EURUSD',
     type: 'BUY' as 'BUY' | 'SELL' | 'BUY_LIMIT' | 'SELL_LIMIT',
@@ -142,6 +190,222 @@ export default function TradePulseApp() {
     mediaUrl: ''
   })
   const [showCreatePost, setShowCreatePost] = useState(false)
+
+  // Mock data para operações (relatório de performance)
+  const [operationReports] = useState<OperationReport[]>([
+    {
+      id: '1',
+      date: '2024-01-20',
+      symbol: 'EURUSD',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 1.0850,
+      exitPrice: 1.0890,
+      profit: 400,
+      duration: 45,
+      accountsReplicated: 8
+    },
+    {
+      id: '2',
+      date: '2024-01-20',
+      symbol: 'GBPUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 1.2650,
+      exitPrice: 1.2620,
+      profit: 300,
+      duration: 32,
+      accountsReplicated: 8
+    },
+    {
+      id: '3',
+      date: '2024-01-19',
+      symbol: 'USDJPY',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 148.50,
+      exitPrice: 149.20,
+      profit: 700,
+      duration: 78,
+      accountsReplicated: 7
+    },
+    {
+      id: '4',
+      date: '2024-01-19',
+      symbol: 'AUDUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 0.6750,
+      exitPrice: 0.6720,
+      profit: 300,
+      duration: 25,
+      accountsReplicated: 7
+    },
+    {
+      id: '5',
+      date: '2024-01-18',
+      symbol: 'USDCAD',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 1.3450,
+      exitPrice: 1.3420,
+      profit: -300,
+      duration: 15,
+      accountsReplicated: 6
+    },
+    {
+      id: '6',
+      date: '2024-01-18',
+      symbol: 'EURUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 1.0880,
+      exitPrice: 1.0850,
+      profit: 300,
+      duration: 55,
+      accountsReplicated: 6
+    },
+    {
+      id: '7',
+      date: '2024-01-17',
+      symbol: 'GBPUSD',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 1.2600,
+      exitPrice: 1.2580,
+      profit: -200,
+      duration: 20,
+      accountsReplicated: 5
+    },
+    {
+      id: '8',
+      date: '2024-01-17',
+      symbol: 'USDJPY',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 148.80,
+      exitPrice: 148.30,
+      profit: 500,
+      duration: 40,
+      accountsReplicated: 5
+    },
+    {
+      id: '9',
+      date: '2024-01-16',
+      symbol: 'EURUSD',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 1.0820,
+      exitPrice: 1.0860,
+      profit: 400,
+      duration: 65,
+      accountsReplicated: 4
+    },
+    {
+      id: '10',
+      date: '2024-01-16',
+      symbol: 'AUDUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 0.6780,
+      exitPrice: 0.6750,
+      profit: 300,
+      duration: 35,
+      accountsReplicated: 4
+    },
+    {
+      id: '11',
+      date: '2024-01-15',
+      symbol: 'USDCAD',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 1.3400,
+      exitPrice: 1.3450,
+      profit: 500,
+      duration: 90,
+      accountsReplicated: 3
+    },
+    {
+      id: '12',
+      date: '2024-01-15',
+      symbol: 'GBPUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 1.2680,
+      exitPrice: 1.2640,
+      profit: 400,
+      duration: 50,
+      accountsReplicated: 3
+    },
+    // Dados adicionais para período mensal e todo tempo
+    {
+      id: '13',
+      date: '2024-01-10',
+      symbol: 'EURUSD',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 1.0800,
+      exitPrice: 1.0850,
+      profit: 500,
+      duration: 60,
+      accountsReplicated: 5
+    },
+    {
+      id: '14',
+      date: '2024-01-05',
+      symbol: 'GBPUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 1.2700,
+      exitPrice: 1.2650,
+      profit: 500,
+      duration: 45,
+      accountsReplicated: 4
+    },
+    {
+      id: '15',
+      date: '2023-12-28',
+      symbol: 'USDJPY',
+      type: 'BUY',
+      status: 'closed',
+      entryPrice: 147.50,
+      exitPrice: 148.00,
+      profit: 500,
+      duration: 30,
+      accountsReplicated: 3
+    },
+    {
+      id: '16',
+      date: '2023-12-20',
+      symbol: 'AUDUSD',
+      type: 'SELL',
+      status: 'closed',
+      entryPrice: 0.6800,
+      exitPrice: 0.6750,
+      profit: 500,
+      duration: 40,
+      accountsReplicated: 3
+    },
+    // Operações ativas (publicadas mas não encerradas)
+    {
+      id: '17',
+      date: '2024-01-20',
+      symbol: 'EURUSD',
+      type: 'BUY',
+      status: 'published',
+      entryPrice: 1.0870,
+      accountsReplicated: 8
+    },
+    {
+      id: '18',
+      date: '2024-01-20',
+      symbol: 'USDJPY',
+      type: 'SELL',
+      status: 'published',
+      entryPrice: 148.90,
+      accountsReplicated: 8
+    }
+  ])
 
   // Mock data para feed
   const [feedPosts, setFeedPosts] = useState<FeedPost[]>([
@@ -419,6 +683,99 @@ export default function TradePulseApp() {
     }
   ])
 
+  // Funções para filtrar dados de performance
+  const getFilteredOperations = () => {
+    const now = new Date()
+    const operations = operationReports.filter(op => op.status === 'closed')
+    
+    switch (performanceFilter) {
+      case 'week':
+        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+        return operations.filter(op => new Date(op.date) >= weekAgo)
+      case 'month':
+        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        return operations.filter(op => new Date(op.date) >= monthAgo)
+      case 'all':
+      default:
+        return operations
+    }
+  }
+
+  const calculatePerformanceMetrics = () => {
+    const operations = getFilteredOperations()
+    const published = operationReports.filter(op => op.status === 'published').length
+    const closed = operations.length
+    const totalProfit = operations.reduce((sum, op) => sum + (op.profit || 0), 0)
+    const winningOps = operations.filter(op => (op.profit || 0) > 0)
+    const successRate = operations.length > 0 ? (winningOps.length / operations.length) * 100 : 0
+    const avgDuration = operations.length > 0 
+      ? operations.reduce((sum, op) => sum + (op.duration || 0), 0) / operations.length 
+      : 0
+
+    return {
+      published,
+      closed,
+      totalProfit,
+      successRate,
+      avgDuration,
+      totalOperations: published + closed
+    }
+  }
+
+  // Dados para o gráfico de linhas - AGORA RESPONSIVO AOS FILTROS
+  const getChartData = () => {
+    const operations = getFilteredOperations()
+    const days = []
+    const profits = []
+    
+    // Determinar período baseado no filtro
+    let daysToShow = 7
+    let dateFormat: Intl.DateTimeFormatOptions = { weekday: 'short', day: '2-digit' }
+    
+    switch (performanceFilter) {
+      case 'week':
+        daysToShow = 7
+        dateFormat = { weekday: 'short', day: '2-digit' }
+        break
+      case 'month':
+        daysToShow = 30
+        dateFormat = { day: '2-digit', month: 'short' }
+        break
+      case 'all':
+        daysToShow = 60 // Últimos 60 dias para "todo tempo"
+        dateFormat = { day: '2-digit', month: 'short' }
+        break
+    }
+    
+    // Gerar dados para o período selecionado
+    for (let i = daysToShow - 1; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      
+      const dayOps = operations.filter(op => op.date === dateStr)
+      const dayProfit = dayOps.reduce((sum, op) => sum + (op.profit || 0), 0)
+      
+      days.push(date.toLocaleDateString('pt-BR', dateFormat))
+      profits.push(dayProfit)
+    }
+    
+    return { days, profits }
+  }
+
+  const getChartTitle = () => {
+    switch (performanceFilter) {
+      case 'week':
+        return 'Performance dos Últimos 7 Dias'
+      case 'month':
+        return 'Performance dos Últimos 30 Dias'
+      case 'all':
+        return 'Performance dos Últimos 60 Dias'
+      default:
+        return 'Performance'
+    }
+  }
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     if (loginData.email === 'admin@tradepulse.com' && loginData.password === 'admin123') {
@@ -451,8 +808,50 @@ export default function TradePulseApp() {
     }
 
     const serverToUse = showCustomServer ? mt5Data.customServer : mt5Data.server
-    // Simulação de conexão MT5
-    alert(`Conta MT5 conectada com sucesso!\nServidor: ${serverToUse}`)
+    
+    // Simulação de conexão MT5 com diferentes cenários
+    const connectionScenarios = [
+      { success: true, message: 'Conexão com sucesso' },
+      { success: false, message: 'Conexão falha' },
+      { success: false, message: 'Senha incorreta' }
+    ]
+    
+    // Simular diferentes resultados baseado nos dados inseridos
+    let scenario
+    if (mt5Data.login === '12345678' && mt5Data.password === 'senha123') {
+      scenario = connectionScenarios[0] // Sucesso
+    } else if (mt5Data.login === '12345678' && mt5Data.password !== 'senha123') {
+      scenario = connectionScenarios[2] // Senha incorreta
+    } else {
+      scenario = connectionScenarios[1] // Conexão falha
+    }
+    
+    // Mostrar notificação baseada no resultado
+    if (scenario.success) {
+      showNotification('success', 'MT5 Conectado', `${scenario.message}! Servidor: ${serverToUse}`)
+      // Adicionar conta à lista (simulação)
+      const newAccount: MT5Account = {
+        id: Date.now().toString(),
+        login: mt5Data.login,
+        server: serverToUse,
+        balance: 10000,
+        equity: 10000,
+        status: 'connected',
+        initialBalance: 10000,
+        riskSettings: {
+          lotSize: 0.1,
+          dailyGainLimit: 500,
+          dailyLossLimit: 200,
+          currentDailyPnL: 0,
+          isBlocked: false
+        }
+      }
+      setConnectedAccounts(prev => [...prev, newAccount])
+    } else {
+      showNotification('error', 'Erro na Conexão', scenario.message)
+    }
+    
+    // Limpar formulário
     setMT5Data({ login: '', password: '', server: '', customServer: '' })
     setShowCustomServer(false)
   }
@@ -1381,6 +1780,50 @@ export default function TradePulseApp() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Notification Container */}
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {notifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`max-w-sm w-full bg-white shadow-lg rounded-xl border-l-4 p-4 transform transition-all duration-300 ${
+              notification.type === 'success' ? 'border-green-500' :
+              notification.type === 'error' ? 'border-red-500' :
+              'border-yellow-500'
+            }`}
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                {notification.type === 'success' && (
+                  <CheckCircle className="w-5 h-5 text-green-500" />
+                )}
+                {notification.type === 'error' && (
+                  <X className="w-5 h-5 text-red-500" />
+                )}
+                {notification.type === 'warning' && (
+                  <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                )}
+              </div>
+              <div className="ml-3 w-0 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  {notification.title}
+                </p>
+                <p className="mt-1 text-sm text-gray-500">
+                  {notification.message}
+                </p>
+              </div>
+              <div className="ml-4 flex-shrink-0 flex">
+                <button
+                  onClick={() => removeNotification(notification.id)}
+                  className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2203,22 +2646,325 @@ export default function TradePulseApp() {
 
         {/* Reports */}
         {currentView === 'reports' && (
-          <div className="space-y-8">
-            <h2 className="text-3xl font-bold text-gray-900">Relatórios e Métricas</h2>
+          <div className="space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Relatórios e Métricas</h2>
+            </div>
+
+            {/* Performance Report Section */}
+            <div className="bg-white rounded-2xl shadow-sm border">
+              <div className="p-4 sm:p-6 border-b">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="bg-gradient-to-r from-blue-100 to-purple-100 p-2 rounded-xl">
+                      <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Relatório de Performance das Operações</h3>
+                  </div>
+                  
+                  {/* Filter Buttons */}
+                  <div className="flex bg-gray-100 rounded-xl p-1 w-full sm:w-auto">
+                    <button
+                      onClick={() => setPerformanceFilter('week')}
+                      className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1 sm:flex-none ${
+                        performanceFilter === 'week' 
+                          ? 'bg-white text-purple-600 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Semanal
+                    </button>
+                    <button
+                      onClick={() => setPerformanceFilter('month')}
+                      className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1 sm:flex-none ${
+                        performanceFilter === 'month' 
+                          ? 'bg-white text-purple-600 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Mensal
+                    </button>
+                    <button
+                      onClick={() => setPerformanceFilter('all')}
+                      className={`px-3 sm:px-4 py-2 rounded-lg text-sm font-medium transition-colors flex-1 sm:flex-none ${
+                        performanceFilter === 'all' 
+                          ? 'bg-white text-purple-600 shadow-sm' 
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      Todo Tempo
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Performance Metrics Cards */}
+              <div className="p-4 sm:p-6">
+                {(() => {
+                  const metrics = calculatePerformanceMetrics()
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                        <div className="bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-200">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className="bg-blue-500 p-1.5 sm:p-2 rounded-lg w-fit">
+                              <Send className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-medium text-blue-700">Publicadas</p>
+                              <p className="text-lg sm:text-2xl font-bold text-blue-900">{metrics.published}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-green-50 rounded-xl p-3 sm:p-4 border border-green-200">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className="bg-green-500 p-1.5 sm:p-2 rounded-lg w-fit">
+                              <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-medium text-green-700">Encerradas</p>
+                              <p className="text-lg sm:text-2xl font-bold text-green-900">{metrics.closed}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-purple-50 rounded-xl p-3 sm:p-4 border border-purple-200">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className="bg-purple-500 p-1.5 sm:p-2 rounded-lg w-fit">
+                              <Target className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-medium text-purple-700">Taxa de Sucesso</p>
+                              <p className="text-lg sm:text-2xl font-bold text-purple-900">{metrics.successRate.toFixed(1)}%</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-orange-50 rounded-xl p-3 sm:p-4 border border-orange-200">
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className="bg-orange-500 p-1.5 sm:p-2 rounded-lg w-fit">
+                              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-xs sm:text-sm font-medium text-orange-700">Tempo Médio</p>
+                              <p className="text-lg sm:text-2xl font-bold text-orange-900">{Math.round(metrics.avgDuration)}min</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={`rounded-xl p-3 sm:p-4 border col-span-2 lg:col-span-1 ${
+                          metrics.totalProfit >= 0 
+                            ? 'bg-emerald-50 border-emerald-200' 
+                            : 'bg-red-50 border-red-200'
+                        }`}>
+                          <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+                            <div className={`p-1.5 sm:p-2 rounded-lg w-fit ${
+                              metrics.totalProfit >= 0 ? 'bg-emerald-500' : 'bg-red-500'
+                            }`}>
+                              <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className={`text-xs sm:text-sm font-medium ${
+                                metrics.totalProfit >= 0 ? 'text-emerald-700' : 'text-red-700'
+                              }`}>
+                                Lucro Total
+                              </p>
+                              <p className={`text-lg sm:text-2xl font-bold ${
+                                metrics.totalProfit >= 0 ? 'text-emerald-900' : 'text-red-900'
+                              }`}>
+                                ${metrics.totalProfit.toFixed(0)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Responsive Line Chart */}
+                      <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-200">
+                        <h4 className="text-base sm:text-lg font-semibold text-gray-900 mb-4 sm:mb-6">{getChartTitle()}</h4>
+                        {(() => {
+                          const chartData = getChartData()
+                          const maxProfit = Math.max(...chartData.profits, 0)
+                          const minProfit = Math.min(...chartData.profits, 0)
+                          const range = maxProfit - minProfit || 1000
+                          
+                          return (
+                            <div className="space-y-4">
+                              {/* Chart Area */}
+                              <div className="relative h-48 sm:h-64 bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
+                                <div className="absolute inset-3 sm:inset-4">
+                                  {/* Y-axis labels */}
+                                  <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500">
+                                    <span>${maxProfit.toFixed(0)}</span>
+                                    <span>${((maxProfit + minProfit) / 2).toFixed(0)}</span>
+                                    <span>${minProfit.toFixed(0)}</span>
+                                  </div>
+                                  
+                                  {/* Chart lines */}
+                                  <div className="ml-8 sm:ml-12 h-full relative">
+                                    {/* Grid lines */}
+                                    <div className="absolute inset-0">
+                                      <div className="h-full border-l border-gray-200"></div>
+                                      <div className="absolute top-0 w-full border-t border-gray-200"></div>
+                                      <div className="absolute top-1/2 w-full border-t border-gray-200"></div>
+                                      <div className="absolute bottom-0 w-full border-t border-gray-200"></div>
+                                    </div>
+                                    
+                                    {/* Line chart */}
+                                    <svg className="w-full h-full">
+                                      <polyline
+                                        fill="none"
+                                        stroke="#8B5CF6"
+                                        strokeWidth="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        points={chartData.profits.map((profit, index) => {
+                                          const x = (index / (chartData.profits.length - 1)) * 100
+                                          const y = 100 - ((profit - minProfit) / range) * 100
+                                          return `${x}%,${y}%`
+                                        }).join(' ')}
+                                      />
+                                      
+                                      {/* Data points */}
+                                      {chartData.profits.map((profit, index) => {
+                                        const x = (index / (chartData.profits.length - 1)) * 100
+                                        const y = 100 - ((profit - minProfit) / range) * 100
+                                        return (
+                                          <circle
+                                            key={index}
+                                            cx={`${x}%`}
+                                            cy={`${y}%`}
+                                            r="3"
+                                            fill={profit >= 0 ? '#10B981' : '#EF4444'}
+                                            stroke="white"
+                                            strokeWidth="2"
+                                          />
+                                        )
+                                      })}
+                                    </svg>
+                                  </div>
+                                </div>
+                                
+                                {/* X-axis labels */}
+                                <div className="absolute bottom-0 left-8 sm:left-12 right-3 sm:right-4 flex justify-between text-xs text-gray-500">
+                                  {chartData.days.map((day, index) => (
+                                    <span key={index} className="text-center">{day}</span>
+                                  ))}
+                                </div>
+                              </div>
+                              
+                              {/* Legend */}
+                              <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm">
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                                  <span className="text-gray-600">Lucro Diário ($)</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                  <span className="text-gray-600">Lucro Positivo</span>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                  <span className="text-gray-600">Perda</span>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })()}
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+            </div>
+
+            {/* Detailed Operations Table */}
+            <div className="bg-white rounded-2xl shadow-sm border">
+              <div className="p-4 sm:p-6 border-b">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Operações Detalhadas</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Símbolo</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrada</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saída</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duração</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contas</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resultado</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {getFilteredOperations().map((operation) => (
+                      <tr key={operation.id}>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {new Date(operation.date).toLocaleDateString('pt-BR')}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                          {operation.symbol}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            operation.type === 'BUY' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {operation.type === 'BUY' ? 'Compra' : 'Venda'}
+                          </span>
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {operation.entryPrice}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {operation.exitPrice || '-'}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {operation.duration ? `${operation.duration}min` : '-'}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {operation.accountsReplicated}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                          {operation.profit !== undefined ? (
+                            <span className={`font-medium ${
+                              operation.profit >= 0 ? 'text-green-600' : 'text-red-600'
+                            }`}>
+                              ${operation.profit}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                            operation.status === 'published' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {operation.status === 'published' ? 'Publicada' : 'Encerrada'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
             {/* Account Balances */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-2xl shadow-sm border p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Saldos das Contas MT5</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+              <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Saldos das Contas MT5</h3>
                 <div className="space-y-4">
                   {connectedAccounts.filter(acc => acc.status === 'connected').map((account) => (
                     <div key={account.id} className="p-4 bg-gray-50 rounded-xl">
-                      <div className="flex justify-between items-start mb-3">
+                      <div className="flex flex-col sm:flex-row justify-between items-start mb-3 gap-2">
                         <div>
                           <p className="font-medium text-gray-900">Login: {account.login}</p>
                           <p className="text-sm text-gray-600">{account.server}</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                           <p className="text-sm text-gray-600">Lote Configurado</p>
                           <p className="font-medium">{account.riskSettings?.lotSize || 0.1}</p>
                         </div>
@@ -2284,19 +3030,19 @@ export default function TradePulseApp() {
               </div>
 
               {/* Trading Metrics */}
-              <div className="bg-white rounded-2xl shadow-sm border p-6">
-                <h3 className="text-xl font-semibold text-gray-900 mb-6">Métricas de Trading</h3>
+              <div className="bg-white rounded-2xl shadow-sm border p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Métricas de Trading</h3>
                 {(() => {
                   const metrics = calculateMetrics()
                   return (
                     <div className="space-y-6">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="text-center p-4 bg-blue-50 rounded-xl">
-                          <div className="text-2xl font-bold text-blue-600">{metrics.totalTrades}</div>
+                          <div className="text-xl sm:text-2xl font-bold text-blue-600">{metrics.totalTrades}</div>
                           <div className="text-sm text-blue-700">Total de Trades</div>
                         </div>
                         <div className="text-center p-4 bg-green-50 rounded-xl">
-                          <div className="text-2xl font-bold text-green-600">{metrics.winRate.toFixed(1)}%</div>
+                          <div className="text-xl sm:text-2xl font-bold text-green-600">{metrics.winRate.toFixed(1)}%</div>
                           <div className="text-sm text-green-700">Taxa de Acerto</div>
                         </div>
                       </div>
@@ -2347,39 +3093,39 @@ export default function TradePulseApp() {
 
             {/* Detailed Trade History */}
             <div className="bg-white rounded-2xl shadow-sm border">
-              <div className="p-6 border-b">
-                <h3 className="text-xl font-semibold text-gray-900">Histórico Detalhado de Trades</h3>
+              <div className="p-4 sm:p-6 border-b">
+                <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Histórico Detalhado de Trades</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Símbolo</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrada</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saída</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lote</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resultado</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data/Hora</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Símbolo</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrada</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Saída</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lote</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Resultado</th>
+                      <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {activeTrades.map((trade) => (
                       <tr key={trade.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.timestamp}</td>
-                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{trade.symbol}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.timestamp}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap font-medium text-gray-900">{trade.symbol}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                             trade.type.includes('BUY') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                           }`}>
                             {getTradeTypeLabel(trade.type)}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.entryPrice}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.exitPrice || '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.lotSize}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.entryPrice}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.exitPrice || '-'}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-900">{trade.lotSize}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           {trade.profit !== undefined ? (
                             <span className={`font-medium ${
                               trade.profit >= 0 ? 'text-green-600' : 'text-red-600'
@@ -2390,7 +3136,7 @@ export default function TradePulseApp() {
                             <span className="text-gray-400">-</span>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                             trade.status === 'active' ? 'bg-blue-100 text-blue-800' : 
                             trade.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
@@ -2432,11 +3178,72 @@ export default function TradePulseApp() {
                         onChange={(e) => setNewTrade({...newTrade, symbol: e.target.value})}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                       >
-                        <option value="EURUSD">EUR/USD</option>
-                        <option value="GBPUSD">GBP/USD</option>
-                        <option value="USDJPY">USD/JPY</option>
-                        <option value="AUDUSD">AUD/USD</option>
-                        <option value="USDCAD">USD/CAD</option>
+                        {/* Forex Majors */}
+                        <optgroup label="🌍 Forex Majors">
+                          <option value="EURUSD">EUR/USD - Euro vs Dólar</option>
+                          <option value="GBPUSD">GBP/USD - Libra vs Dólar</option>
+                          <option value="USDJPY">USD/JPY - Dólar vs Iene</option>
+                          <option value="USDCHF">USD/CHF - Dólar vs Franco Suíço</option>
+                          <option value="AUDUSD">AUD/USD - Dólar Australiano vs Dólar</option>
+                          <option value="USDCAD">USD/CAD - Dólar vs Dólar Canadense</option>
+                          <option value="NZDUSD">NZD/USD - Dólar Neozelandês vs Dólar</option>
+                        </optgroup>
+                        
+                        {/* Forex Crosses */}
+                        <optgroup label="🔄 Forex Crosses">
+                          <option value="EURJPY">EUR/JPY - Euro vs Iene</option>
+                          <option value="GBPJPY">GBP/JPY - Libra vs Iene</option>
+                          <option value="EURGBP">EUR/GBP - Euro vs Libra</option>
+                          <option value="EURAUD">EUR/AUD - Euro vs Dólar Australiano</option>
+                          <option value="EURCHF">EUR/CHF - Euro vs Franco Suíço</option>
+                          <option value="EURCAD">EUR/CAD - Euro vs Dólar Canadense</option>
+                          <option value="GBPAUD">GBP/AUD - Libra vs Dólar Australiano</option>
+                          <option value="GBPCAD">GBP/CAD - Libra vs Dólar Canadense</option>
+                          <option value="GBPCHF">GBP/CHF - Libra vs Franco Suíço</option>
+                          <option value="AUDCAD">AUD/CAD - Dólar Australiano vs Canadense</option>
+                          <option value="AUDCHF">AUD/CHF - Dólar Australiano vs Franco</option>
+                          <option value="AUDJPY">AUD/JPY - Dólar Australiano vs Iene</option>
+                          <option value="CADCHF">CAD/CHF - Dólar Canadense vs Franco</option>
+                          <option value="CADJPY">CAD/JPY - Dólar Canadense vs Iene</option>
+                          <option value="CHFJPY">CHF/JPY - Franco Suíço vs Iene</option>
+                          <option value="NZDCAD">NZD/CAD - Dólar Neozelandês vs Canadense</option>
+                          <option value="NZDCHF">NZD/CHF - Dólar Neozelandês vs Franco</option>
+                          <option value="NZDJPY">NZD/JPY - Dólar Neozelandês vs Iene</option>
+                          <option value="AUDNZD">AUD/NZD - Dólar Australiano vs Neozelandês</option>
+                        </optgroup>
+                        
+                        {/* Commodities */}
+                        <optgroup label="🥇 Metais Preciosos">
+                          <option value="XAUUSD">XAU/USD - Ouro vs Dólar</option>
+                          <option value="XAGUSD">XAG/USD - Prata vs Dólar</option>
+                          <option value="XPDUSD">XPD/USD - Paládio vs Dólar</option>
+                          <option value="XPTUSD">XPT/USD - Platina vs Dólar</option>
+                        </optgroup>
+                        
+                        {/* US Indices */}
+                        <optgroup label="📈 Índices Americanos">
+                          <option value="US30">US30 - Dow Jones Industrial Average</option>
+                          <option value="US500">US500 - S&P 500</option>
+                          <option value="NAS100">NAS100 - NASDAQ 100</option>
+                          <option value="US2000">US2000 - Russell 2000</option>
+                          <option value="VIX">VIX - Índice de Volatilidade</option>
+                        </optgroup>
+                        
+                        {/* Energy */}
+                        <optgroup label="⚡ Energia">
+                          <option value="USOIL">USOIL - Petróleo Bruto WTI</option>
+                          <option value="UKOIL">UKOIL - Petróleo Brent</option>
+                          <option value="NGAS">NGAS - Gás Natural</option>
+                        </optgroup>
+                        
+                        {/* Crypto */}
+                        <optgroup label="₿ Criptomoedas">
+                          <option value="BTCUSD">BTC/USD - Bitcoin vs Dólar</option>
+                          <option value="ETHUSD">ETH/USD - Ethereum vs Dólar</option>
+                          <option value="LTCUSD">LTC/USD - Litecoin vs Dólar</option>
+                          <option value="ADAUSD">ADA/USD - Cardano vs Dólar</option>
+                          <option value="DOTUSD">DOT/USD - Polkadot vs Dólar</option>
+                        </optgroup>
                       </select>
                     </div>
 
@@ -3075,6 +3882,21 @@ export default function TradePulseApp() {
                       <p className="text-xs text-gray-600 mt-1">
                         Selecione "Servidor Personalizado" e digite o nome exato do servidor da sua corretora.
                         O nome pode ser encontrado no seu MT5.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dica para teste */}
+                <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                  <div className="flex items-start space-x-2">
+                    <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">Para testar a notificação:</p>
+                      <p className="text-xs text-blue-700 mt-1">
+                        • Login: 12345678 + Senha: senha123 = Conexão com sucesso<br/>
+                        • Login: 12345678 + Senha incorreta = Senha incorreta<br/>
+                        • Outros dados = Conexão falha
                       </p>
                     </div>
                   </div>
